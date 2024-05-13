@@ -1,59 +1,73 @@
 "use client";
 
-import Image from "next/image";
 import styles from "./page.module.css";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 const ORDER_COMPLETED_EVENT_NAME = "STASH_WINDOW_EVENT__PURCHASE_COMPLETE";
 
 export default function Home() {
-    const [orderId, setOrderId] = useState<string | null>(null);
-const [hasOrderCompleted, setHasOrderCompleted] = useState(false);
-    useEffect(() => {
-        const handleMessage = (event: MessageEvent) => {
-            const hasEventKey = "eventName" in event.data;
-            if (!hasEventKey) {
-                return;
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [hasOrderCompleted, setHasOrderCompleted] = useState(false);
+  const orderStatus = hasOrderCompleted ? "Completed" : "Pending";
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const hasEventKey = typeof event.data === 'object' && event.data && "eventName" in event.data;
+      if (!hasEventKey) {
+        return;
+      }
+
+      switch (event.data.eventName) {
+        case ORDER_COMPLETED_EVENT_NAME:
+          setHasOrderCompleted(true);
+          break;
+        default:
+          console.log("Unsupported event name: ", event.data.eventName);
+      }
+    };
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []);
+
+  return (
+    <main className={styles.main}>
+      <button
+        type="button"
+        className={styles.button}
+        onClick={async () => {
+          try {
+            const res = await fetch("/api/checkout-session", {
+              method: "POST",
+              headers: {
+                "content-type": "application/json",
+              },
+            });
+
+            const data = await res.json();
+            if (!data.url) {
+              throw new Error("No URL returned from server");
+            } else {
+              setOrderId(data.id);
+              setHasOrderCompleted(false);
+              window.open(
+                  data.url,
+                "_blank",
+              );
             }
-            console.log("event.data: ", event.data);
-switch (event.data.eventName) {
-    case ORDER_COMPLETED_EVENT_NAME:
-        setHasOrderCompleted(true);
-    default:
-        console.log('Unsupported event name: ', event.data.eventName);
-}
+          } catch (err: unknown) {
+            console.error(err);
+          }
+        }}
+      >
+        Create checkout session on Stash
+      </button>
+      <div className={styles.content}>
 
-        };
-        window.addEventListener("message", handleMessage);
-
-        return () => {
-           window.removeEventListener("message", handleMessage);
-        }
-    }, []);
-
-    return (
-        <main className={styles.main}>
-          <button type="button" className={styles.button} onClick={async () => {
-              try {
-                  const res = await fetch("/api/checkout-session", {
-                      method: "POST",
-                      headers: {
-                        'content-type': 'application/json',
-                      }
-                  });
-                  const data = await res.json();
-                  console.log("data: ", data);
-                  if (!data.url) {
-                      throw new Error("No URL returned from server");
-                  } else {
-                      window.open(`http://localhost:4000/iosdemo-test/order/${data.id}`, "_blank");
-                  }
-              } catch (err: unknown) {
-                  console.error(err);
-              }
-
-          }}>Create checkout session on Stash</button>
-
-        </main>
+        {orderId && <p>Active Order ID: {orderId}</p>}
+      {orderId && <p>Order status: {orderStatus}</p>}
+      </div>
+    </main>
   );
 }
