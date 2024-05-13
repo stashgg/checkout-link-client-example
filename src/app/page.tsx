@@ -11,7 +11,10 @@ export default function Home() {
   const orderStatus = hasOrderCompleted ? "Completed" : "Pending";
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      const hasEventKey = typeof event.data === 'object' && event.data && "eventName" in event.data;
+      const hasEventKey =
+        typeof event.data === "object" &&
+        event.data &&
+        "eventName" in event.data;
       if (!hasEventKey) {
         return;
       }
@@ -51,10 +54,7 @@ export default function Home() {
             } else {
               setOrderId(data.id);
               setHasOrderCompleted(false);
-              window.open(
-                  data.url,
-                "_blank",
-              );
+              window.open(data.url, "_blank");
             }
           } catch (err: unknown) {
             console.error(err);
@@ -64,9 +64,8 @@ export default function Home() {
         Create checkout session on Stash
       </button>
       <div className={styles.content}>
-
         {orderId && <p>Active Order ID: {orderId}</p>}
-      {orderId && <p>Order status: {orderStatus}</p>}
+        {orderId && <p>Order status: {orderStatus}</p>}
       </div>
     </main>
   );

@@ -1,8 +1,7 @@
 const CREATE_CHECKOUT_LINK_URL =
   "https://test-api.stash.gg/sdk/checkout_links/create";
 
-const STASH_API_KEY =
-  process.env.STASH_API_KEY;
+const STASH_API_KEY = process.env.STASH_API_KEY;
 
 const SAMPLE_ITEM = {
   id: "stash-test-01",
@@ -16,7 +15,7 @@ const SAMPLE_ITEM = {
 
 export async function POST() {
   if (!STASH_API_KEY) {
-    return Response.json({error: "STASH_API_KEY not set"}, {status: 500});
+    return Response.json({ error: "STASH_API_KEY not set" }, { status: 500 });
   }
   const options = {
     method: "POST",
