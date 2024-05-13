@@ -1,36 +1,54 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Order Link Client Example
 
-## Getting Started
+This repo contains an example of how to use the Order Link API client.
 
-First, run the development server:
+### Cross-window communication
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+The Stash order link window uses cross-window communication via the `postMessage` interface.
+
+In order to leverage events sent from Stash, you must listen for the `message` event on the parent `window` object.
+
+```typescript
+const ORDER_COMPLETED_EVENT_NAME = "STASH_WINDOW_EVENT__PURCHASE_COMPLETE";
+
+useEffect(() => {
+  const handleMessage = (event: MessageEvent) => {
+    const hasEventKey =
+      typeof event.data === "object" && event.data && "eventName" in event.data;
+    if (!hasEventKey) {
+      return;
+    }
+
+    switch (event.data.eventName) {
+      case ORDER_COMPLETED_EVENT_NAME:
+        setHasOrderCompleted(true);
+        break;
+      default:
+        console.log("Unsupported event name: ", event.data.eventName);
+    }
+  };
+  window.addEventListener("message", handleMessage);
+
+  return () => {
+    window.removeEventListener("message", handleMessage);
+  };
+}, []);
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Event payload
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The `event.data` payload will contain an object with the following shape:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```typescript
+interface Payload {
+  eventName: string;
+}
+```
 
-## Learn More
+Event names returned from Stash will always be prefixed with `STASH_WINDOW_EVENT__`.
 
-To learn more about Next.js, take a look at the following resources:
+### Event names
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The following event names are supported:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- `STASH_WINDOW_EVENT__PURCHASE_COMPLETE`: This event is sent when the user has completed their purchase.
