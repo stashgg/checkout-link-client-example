@@ -21,7 +21,7 @@ useEffect(() => {
 
     switch (event.data.eventName) {
       case ORDER_COMPLETED_EVENT_NAME:
-        setHasOrderCompleted(true);
+        // Handle ORDER_COMPLETED event
         break;
       default:
         console.log("Unsupported event name: ", event.data.eventName);
