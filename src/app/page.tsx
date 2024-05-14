@@ -4,7 +4,8 @@ import styles from "./page.module.css";
 import { useEffect, useState } from "react";
 
 const ORDER_COMPLETED_EVENT_NAME = "STASH_WINDOW_EVENT__PURCHASE_COMPLETE";
-const CLOSE_WINDOW_EVENT_NAME = "STASH_WINDOW_EVENT__CLOSE_PURCHASE_SUCCESS_WINDOW";
+const CLOSE_WINDOW_EVENT_NAME =
+  "STASH_WINDOW_EVENT__CLOSE_PURCHASE_SUCCESS_WINDOW";
 
 export default function Home() {
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -58,12 +59,7 @@ export default function Home() {
             } else {
               setOrderId(data.id);
               setHasOrderCompleted(false);
-              const child = window.open(
-                  // data.url,
-                  `http://localhost:4000/example-checkout-link-test/order/${data.id}`,
-                  
-                  "_blank"
-              );
+              const child = window.open(data.url, "_blank");
               setChildWindow(child);
             }
           } catch (err: unknown) {
