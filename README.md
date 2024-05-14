@@ -10,6 +10,7 @@ In order to leverage events sent from Stash, you must listen for the `message` e
 
 ```typescript
 const ORDER_COMPLETED_EVENT_NAME = "STASH_WINDOW_EVENT__PURCHASE_COMPLETE";
+const CLOSE_WINDOW_EVENT_NAME = "STASH_WINDOW_EVENT__CLOSE_PURCHASE_SUCCESS_WINDOW";
 
 useEffect(() => {
   const handleMessage = (event: MessageEvent) => {
@@ -20,9 +21,12 @@ useEffect(() => {
     }
 
     switch (event.data.eventName) {
-      case ORDER_COMPLETED_EVENT_NAME:
-        // Handle ORDER_COMPLETED event
-        break;
+        case ORDER_COMPLETED_EVENT_NAME:
+            // Handle ORDER_COMPLETED event
+            break;
+        case CLOSE_WINDOW_EVENT_NAME:
+            // Handle CLOSE_WINDOW event
+            break;
       default:
         console.log("Unsupported event name: ", event.data.eventName);
     }
@@ -52,3 +56,4 @@ Event names returned from Stash will always be prefixed with `STASH_WINDOW_EVENT
 The following event names are supported:
 
 - `STASH_WINDOW_EVENT__PURCHASE_COMPLETE`: This event is sent when the user has completed their purchase.
+- `STASH_WINDOW_EVENT__CLOSE_PURCHASE_SUCCESS_WINDOW`: This event is sent when the user clicks "close" in the purchase success UI.

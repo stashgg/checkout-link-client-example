@@ -4,10 +4,12 @@ import styles from "./page.module.css";
 import { useEffect, useState } from "react";
 
 const ORDER_COMPLETED_EVENT_NAME = "STASH_WINDOW_EVENT__PURCHASE_COMPLETE";
+const CLOSE_WINDOW_EVENT_NAME = "STASH_WINDOW_EVENT__CLOSE_PURCHASE_SUCCESS_WINDOW";
 
 export default function Home() {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [hasOrderCompleted, setHasOrderCompleted] = useState(false);
+  const [childWindow, setChildWindow] = useState<Window | null>(null);
   const orderStatus = hasOrderCompleted ? "Completed" : "Pending";
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -23,6 +25,8 @@ export default function Home() {
         case ORDER_COMPLETED_EVENT_NAME:
           setHasOrderCompleted(true);
           break;
+        case CLOSE_WINDOW_EVENT_NAME:
+          childWindow?.close();
         default:
           console.log("Unsupported event name: ", event.data.eventName);
       }
@@ -32,7 +36,7 @@ export default function Home() {
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, []);
+  }, [childWindow]);
 
   return (
     <main className={styles.main}>
@@ -54,7 +58,13 @@ export default function Home() {
             } else {
               setOrderId(data.id);
               setHasOrderCompleted(false);
-              window.open(data.url, "_blank");
+              const child = window.open(
+                  // data.url,
+                  `http://localhost:4000/example-checkout-link-test/order/${data.id}`,
+                  
+                  "_blank"
+              );
+              setChildWindow(child);
             }
           } catch (err: unknown) {
             console.error(err);
